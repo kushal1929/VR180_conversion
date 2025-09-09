@@ -1,79 +1,104 @@
-VR180 Conversion
-Overview
+🎬 VR180 Conversion
 
-VR180 Conversion is a web application designed to convert 3D 360° videos into immersive VR180 format. This tool is particularly useful for content creators and developers working with VR180 videos, enabling them to convert and view their content in a VR headset for a more immersive experience.
+Convert your 2D videos into immersive VR180 experiences in just a few clicks!
 
-Live Demo
+🌐 Live Demo
 
-Explore the live application here: https://vr180-conversion.onrender.com/
+Check it out here: https://vr180-conversion.onrender.com/
 
-Features
+✨ Features
 
-3D 360° to VR180 Conversion: Transform 360° videos into VR180 format for immersive viewing.
+🎥 2D → VR180 Conversion: Automatically process 2D clips into stereoscopic VR180 videos.
 
-Real-Time Preview: View the converted content directly in your browser before finalizing.
+🚀 Fast Processing: Real-time progress tracking while your video converts.
 
-User-Friendly Interface: Simple and intuitive design for ease of use.
+🖼 Preview Before Download: Preview the VR output before saving.
 
-Technologies Used
+🎨 User-Friendly UI: Clean and modern interface built for non-technical users.
 
-Frontend: React, Tailwind CSS
-
-Backend: Express.js
-
-Video Processing: FFmpeg
-
-Database: PostgreSQL
-
-Authentication: Passport.js
-
-State Management: React Query
-
-Setup Instructions
-
-To run this project locally, follow these steps:
-
-Clone the repository:
-
+🛠 Tech Stack
+Layer	Technology
+Frontend	React 18, TailwindCSS, Radix UI, Framer Motion
+Backend	Node.js, Express, FFmpeg, WebSockets
+Database	PostgreSQL (Neon Serverless) via Drizzle ORM
+Auth	Passport.js
+Video Processing	Depth estimation + stereoscopic rendering algorithms
+Bundler & Build	Vite, esbuild, tsx
+⚡ Quick Start (Development)
+# Clone the repo
 git clone https://github.com/kushal1929/VR180_conversion.git
 cd VR180_conversion
 
-
-Install dependencies:
-
+# Install dependencies
 npm install
 
+# Start the dev server (Windows friendly)
+npx cross-env NODE_ENV=development tsx server/index.ts
 
-Set up environment variables:
-
-Create a .env file in the root directory and add the following:
-
-DATABASE_URL=your_database_url
-SESSION_SECRET=your_session_secret
-
-
-Run the development server:
-
+# OR (if cross-env installed globally)
 npm run dev
 
 
-The application will be available at http://localhost:3000
-.
+The app will run at: http://localhost:5000 (or process.env.PORT)
 
-Deployment
+🚀 Deployment (Render)
 
-This application is deployed on Render. For deployment on other platforms, ensure the following:
+Go to Render
+ → New Web Service → Connect GitHub repo
 
-Node.js: Version 18.x
+Root Directory: leave blank (repo root contains package.json)
 
-Build Command: npm run build
+Build Command:
 
-Start Command: npm run start
+npm install && npm run build
 
-Contributing
 
-Contributions are welcome! Please fork the repository, create a new branch, and submit a pull request with your changes.
+Start Command:
 
-License
+npm start
 
-This project is licensed under the MIT License.
+
+Port: Make sure server/index.ts listens to process.env.PORT
+
+🎯 How It Works
+
+Upload a 2D clip.
+
+The server processes it using depth estimation + stereoscopic rendering.
+
+Preview your VR180 clip in the browser.
+
+Download the final VR180 video and enjoy immersive playback!
+
+📦 Folder Structure (Root)
+VR180_conversion/
+│
+├─ server/             # Backend code (Express + FFmpeg)
+├─ uploads/            # Video uploads (empty in repo, use .gitkeep)
+├─ package.json        # Project config & scripts
+├─ tsconfig.json       # TypeScript config
+└─ src/                # Frontend React + Tailwind code
+
+
+💡 Tip: Keep uploads/ empty in GitHub, add .gitkeep to track the folder.
+
+📝 Scripts
+Command	Description
+npm run dev	Run development server
+npm run build	Build frontend + backend
+npm start	Start production server
+🤝 Contributing
+
+Contributions are welcome!
+
+Fork the repo
+
+Create a new branch
+
+Make changes & push
+
+Submit a Pull Request
+
+📄 License
+
+MIT License © 2025 Kushal
