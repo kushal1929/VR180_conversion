@@ -95,11 +95,12 @@ export default function VideoPreview({ video, onAccept, onRegenerate }: VideoPre
           </Button>
           <Button 
             onClick={onAccept}
-            className="floating-action"
-            data-testid="button-download-vr"
+            className="floating-action bg-primary hover:bg-primary/90"
+            data-testid="button-proceed-download"
+            size="lg"
           >
             <Download className="mr-2 h-4 w-4" />
-            Download VR Video
+            Proceed to Download
           </Button>
         </div>
       </CardContent>

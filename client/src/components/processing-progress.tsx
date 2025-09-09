@@ -28,7 +28,10 @@ export default function ProcessingProgress({ video, onComplete }: ProcessingProg
 
   useEffect(() => {
     if (currentVideo?.status === "completed") {
-      onComplete();
+      // Small delay to show completion state before transitioning
+      setTimeout(() => {
+        onComplete();
+      }, 1000);
     }
   }, [currentVideo?.status, onComplete]);
 

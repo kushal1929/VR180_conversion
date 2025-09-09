@@ -2,52 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-/* LIGHT MODE */
+/* DARK MODE */
 :root {
-  --button-outline: rgba(0,0,0, .10);
-  --badge-outline: rgba(0,0,0, .05);
+  --button-outline: rgba(255,255,255, .15);
+  --badge-outline: rgba(255,255,255, .08);
 
   /* Automatic computation of border around primary / danger buttons */
-  --opaque-button-border-intensity: -8; /* In terms of percentages */
+  --opaque-button-border-intensity: 8; /* In terms of percentages */
 
   /* Backgrounds applied on top of other backgrounds when hovered/active */
-  --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
+  --elevate-1: rgba(255,255,255, .05);
+  --elevate-2: rgba(255,255,255, .12);
 
-  --background: hsl(225 25% 8%);
-  --foreground: hsl(0 0% 95%);
-  --border: hsl(225 20% 25%);
-  --card: hsl(225 25% 12%);
-  --card-foreground: hsl(0 0% 95%);
-  --card-border: hsl(225 20% 25%);
-  --sidebar: hsl(225 25% 12%);
-  --sidebar-foreground: hsl(0 0% 95%);
-  --sidebar-border: hsl(225 20% 25%);
-  --sidebar-primary: hsl(215 100% 50%);
+  --background: hsl(210 40% 2%);
+  --foreground: hsl(0 0% 98%);
+  --border: hsl(210 30% 18%);
+  --card: hsl(210 40% 4%);
+  --card-foreground: hsl(0 0% 98%);
+  --card-border: hsl(210 30% 18%);
+  --sidebar: hsl(210 40% 4%);
+  --sidebar-foreground: hsl(0 0% 98%);
+  --sidebar-border: hsl(210 30% 18%);
+  --sidebar-primary: hsl(263 70% 60%);
   --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(225 30% 25%);
-  --sidebar-accent-foreground: hsl(0 0% 95%);
-  --sidebar-ring: hsl(215 100% 50%);
-  --popover: hsl(225 25% 12%);
-  --popover-foreground: hsl(0 0% 95%);
-  --popover-border: hsl(225 20% 25%);
-  --primary: hsl(215 100% 50%);
+  --sidebar-accent: hsl(210 40% 12%);
+  --sidebar-accent-foreground: hsl(0 0% 98%);
+  --sidebar-ring: hsl(263 70% 60%);
+  --popover: hsl(210 40% 4%);
+  --popover-foreground: hsl(0 0% 98%);
+  --popover-border: hsl(210 30% 18%);
+  --primary: hsl(263 70% 60%);
   --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(225 25% 18%);
-  --secondary-foreground: hsl(0 0% 90%);
-  --muted: hsl(225 15% 20%);
-  --muted-foreground: hsl(0 0% 65%);
-  --accent: hsl(225 30% 25%);
-  --accent-foreground: hsl(0 0% 95%);
-  --destructive: hsl(0 70% 60%);
+  --secondary: hsl(210 40% 8%);
+  --secondary-foreground: hsl(0 0% 95%);
+  --muted: hsl(210 40% 12%);
+  --muted-foreground: hsl(0 0% 70%);
+  --accent: hsl(210 40% 12%);
+  --accent-foreground: hsl(0 0% 98%);
+  --destructive: hsl(0 62% 58%);
   --destructive-foreground: hsl(0 0% 100%);
-  --input: hsl(225 25% 16%);
-  --ring: hsl(215 100% 50%);
-  --chart-1: hsl(215 100% 50%);
-  --chart-2: hsl(150 80% 50%);
-  --chart-3: hsl(25 90% 60%);
-  --chart-4: hsl(280 80% 60%);
-  --chart-5: hsl(45 90% 55%);
+  --input: hsl(210 40% 8%);
+  --ring: hsl(263 70% 60%);
+  --chart-1: hsl(263 70% 60%);
+  --chart-2: hsl(142 76% 55%);
+  --chart-3: hsl(35 91% 65%);
+  --chart-4: hsl(280 80% 70%);
+  --chart-5: hsl(48 96% 62%);
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-serif: Georgia, serif;
@@ -100,61 +100,7 @@
 }
 
 .dark {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
-
-  --opaque-button-border-intensity: 9;  /* In terms of percentages */
-
-  /* Backgrounds applied on top of other backgrounds when hovered/active */
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
-
-  --background: hsl(225 25% 8%);
-  --foreground: hsl(0 0% 95%);
-  --border: hsl(225 20% 25%);
-  --card: hsl(225 25% 12%);
-  --card-foreground: hsl(0 0% 95%);
-  --card-border: hsl(225 20% 25%);
-  --sidebar: hsl(225 25% 12%);
-  --sidebar-foreground: hsl(0 0% 95%);
-  --sidebar-border: hsl(225 20% 25%);
-  --sidebar-primary: hsl(215 100% 50%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(225 30% 25%);
-  --sidebar-accent-foreground: hsl(0 0% 95%);
-  --sidebar-ring: hsl(215 100% 50%);
-  --popover: hsl(225 25% 12%);
-  --popover-foreground: hsl(0 0% 95%);
-  --popover-border: hsl(225 20% 25%);
-  --primary: hsl(215 100% 50%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(225 25% 18%);
-  --secondary-foreground: hsl(0 0% 90%);
-  --muted: hsl(225 15% 20%);
-  --muted-foreground: hsl(0 0% 65%);
-  --accent: hsl(225 30% 25%);
-  --accent-foreground: hsl(0 0% 95%);
-  --destructive: hsl(0 70% 60%);
-  --destructive-foreground: hsl(0 0% 100%);
-  --input: hsl(225 25% 16%);
-  --ring: hsl(215 100% 50%);
-  --chart-1: hsl(215 100% 50%);
-  --chart-2: hsl(150 80% 50%);
-  --chart-3: hsl(25 90% 60%);
-  --chart-4: hsl(280 80% 60%);
-  --chart-5: hsl(45 90% 55%);
-
-  --shadow-2xs: 0px 2px 0px 0px hsl(225 20% 25% / 0.05);
-  --shadow-xs: 0px 2px 0px 0px hsl(225 20% 25% / 0.05);
-  --shadow-sm: 0px 2px 0px 0px hsl(225 20% 25% / 0.05), 0px 1px 2px -1px hsl(225 20% 25% / 0.1);
-  --shadow: 0px 2px 0px 0px hsl(225 20% 25% / 0.05), 0px 1px 2px -1px hsl(225 20% 25% / 0.1);
-  --shadow-md: 0px 2px 0px 0px hsl(225 20% 25% / 0.05), 0px 2px 4px -1px hsl(225 20% 25% / 0.1);
-  --shadow-lg: 0px 2px 0px 0px hsl(225 20% 25% / 0.05), 0px 4px 6px -1px hsl(225 20% 25% / 0.1);
-  --shadow-xl: 0px 2px 0px 0px hsl(225 20% 25% / 0.05), 0px 8px 10px -1px hsl(225 20% 25% / 0.1);
-  --shadow-2xl: 0px 2px 0px 0px hsl(225 20% 25% / 0.05);
-
-  --success: hsl(150 80% 50%);
-  --warning: hsl(25 90% 60%);
+  /* Same as root since we're using dark theme by default */
 }
 
 @layer base {
@@ -211,18 +157,18 @@
   /* Upload zone specific styles */
   .upload-zone {
     transition: all 0.3s ease;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.05));
+    background: linear-gradient(135deg, hsla(263, 70%, 60%, 0.1), hsla(263, 70%, 60%, 0.05));
     border: 2px dashed hsl(var(--border));
   }
 
   .upload-zone:hover {
     border-color: hsl(var(--primary));
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1));
+    background: linear-gradient(135deg, hsla(263, 70%, 60%, 0.2), hsla(263, 70%, 60%, 0.1));
   }
 
   .upload-zone.dragover {
     border-color: hsl(var(--success));
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(21, 128, 61, 0.1));
+    background: linear-gradient(135deg, hsla(142, 76%, 55%, 0.2), hsla(142, 76%, 55%, 0.1));
   }
 
   /* Progress bar styling */
@@ -243,7 +189,7 @@
 
   /* Floating action shadow */
   .floating-action {
-    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 10px 25px hsla(263, 70%, 60%, 0.4);
   }
 
   /**
