@@ -83,16 +83,15 @@ export class VideoProcessor {
         });
       }
 
-      // Step 1: Depth Analysis
+      // Step 1: Depth Analysis (5 seconds)
       await this.updateStepStatus(videoId, "depth_analysis", "processing", 0);
       await this.storage.updateVideo(videoId, { progress: 10 });
       
-      // Simulate depth analysis processing
-      await this.simulateProcessing(1000);
+      await this.simulateProcessing(5000); // 5 seconds
       await this.updateStepStatus(videoId, "depth_analysis", "completed", 100);
       await this.storage.updateVideo(videoId, { progress: 25 });
 
-      // Step 2: Stereoscopic Generation
+      // Step 2: Stereoscopic Generation (15 seconds)
       await this.updateStepStatus(videoId, "stereoscopic_generation", "processing", 0);
       
       // Generate stereoscopic version
@@ -101,13 +100,13 @@ export class VideoProcessor {
       await this.updateStepStatus(videoId, "stereoscopic_generation", "completed", 100);
       await this.storage.updateVideo(videoId, { progress: 60, vrPath });
 
-      // Step 3: Quality Enhancement
+      // Step 3: Quality Enhancement (5 seconds)
       await this.updateStepStatus(videoId, "quality_enhancement", "processing", 0);
-      await this.simulateProcessing(1500);
+      await this.simulateProcessing(5000); // 5 seconds
       await this.updateStepStatus(videoId, "quality_enhancement", "completed", 100);
       await this.storage.updateVideo(videoId, { progress: 85 });
 
-      // Step 4: Final Rendering (Mobile version)
+      // Step 4: Final Rendering - Mobile version (5 seconds)
       await this.updateStepStatus(videoId, "final_rendering", "processing", 0);
       
       const mobileVrPath = await this.generateMobileVrVideo(vrPath, videoId);
@@ -144,30 +143,53 @@ export class VideoProcessor {
     }
   }
 
+  private async updateStepProgress(videoId: string, stepName: string, progress: number): Promise<void> {
+    const steps = await this.storage.getProcessingSteps(videoId);
+    const step = steps.find(s => s.stepName === stepName);
+    
+    if (step) {
+      await this.storage.updateProcessingStep(step.id, { progress });
+    }
+  }
+
   private async generateStereoscopicVideo(inputPath: string, videoId: string): Promise<string> {
-    const outputPath = path.join("uploads", `${videoId}_vr180.mp4`);
+    const outputPath = path.join(process.cwd(), "uploads", `${videoId}_vr180.mp4`);
     
     return new Promise((resolve, reject) => {
       // Create side-by-side stereoscopic video using FFmpeg
+      // This creates a convincing VR 180 effect by duplicating the input with slight transformations
       const ffmpeg = spawn("ffmpeg", [
         "-i", inputPath,
         "-filter_complex", 
-        `[0:v]scale=1920:1080,split=2[left][right];
-         [left]crop=1920:1080:0:0[left_crop];
-         [right]crop=1920:1080:0:0,hflip[right_flip];
-         [left_crop][right_flip]hstack=inputs=2[stereo]`,
-        "-map", "[stereo]",
+        `[0:v]scale=1920:1080[main];
+         [main]split=2[left][right];
+         [left]crop=1920:1080:0:0[left_eye];
+         [right]crop=1920:1080:0:0,perspective=x0=0:y0=0:x1=1920:y1=0:x2=0:y2=1080:x3=1920:y3=1080:x4=10:y4=5:x5=1910:y5=5:x6=10:y6=1075:x7=1910:y7=1075:interpolation=linear[right_eye];
+         [left_eye][right_eye]hstack=inputs=2[vr180]`,
+        "-map", "[vr180]",
         "-map", "0:a?",
         "-c:v", "libx264",
-        "-crf", "23",
-        "-preset", "medium",
+        "-crf", "20",
+        "-preset", "fast",
+        "-profile:v", "high",
+        "-level:v", "4.0",
         "-c:a", "aac",
         "-b:a", "128k",
+        "-movflags", "+faststart",
         "-y",
         outputPath
       ]);
 
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += 5;
+        if (progress <= 100) {
+          this.updateStepProgress(videoId, "stereoscopic_generation", progress);
+        }
+      }, 750); // Update every 0.75 seconds
+
       ffmpeg.on("close", (code) => {
+        clearInterval(progressInterval);
         if (code === 0) {
           resolve(outputPath);
         } else {
@@ -175,12 +197,15 @@ export class VideoProcessor {
         }
       });
 
-      ffmpeg.on("error", reject);
+      ffmpeg.on("error", (error) => {
+        clearInterval(progressInterval);
+        reject(error);
+      });
     });
   }
 
   private async generateMobileVrVideo(inputPath: string, videoId: string): Promise<string> {
-    const outputPath = path.join("uploads", `${videoId}_vr180_mobile.mp4`);
+    const outputPath = path.join(process.cwd(), "uploads", `${videoId}_vr180_mobile.mp4`);
     
     return new Promise((resolve, reject) => {
       // Create mobile-optimized version
@@ -188,15 +213,27 @@ export class VideoProcessor {
         "-i", inputPath,
         "-vf", "scale=1920:960",
         "-c:v", "libx264",
-        "-crf", "28",
-        "-preset", "fast",
+        "-crf", "26",
+        "-preset", "faster",
+        "-profile:v", "baseline",
+        "-level:v", "3.1",
         "-c:a", "aac",
         "-b:a", "96k",
+        "-movflags", "+faststart",
         "-y",
         outputPath
       ]);
 
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += 10;
+        if (progress <= 100) {
+          this.updateStepProgress(videoId, "final_rendering", progress);
+        }
+      }, 500); // Update every 0.5 seconds
+
       ffmpeg.on("close", (code) => {
+        clearInterval(progressInterval);
         if (code === 0) {
           resolve(outputPath);
         } else {
@@ -204,7 +241,10 @@ export class VideoProcessor {
         }
       });
 
-      ffmpeg.on("error", reject);
+      ffmpeg.on("error", (error) => {
+        clearInterval(progressInterval);
+        reject(error);
+      });
     });
   }
 
