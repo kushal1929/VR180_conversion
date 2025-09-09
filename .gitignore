@@ -8,3 +8,5 @@ uploads/*
 !uploads/.gitkeep
 "uploads/*" 
 "!uploads/.gitkeep" 
+"uploads/*" 
+"!uploads/.gitkeep" 
