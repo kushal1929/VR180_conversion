@@ -1,0 +1,652 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR180 Converter - Transform 2D Videos to Immersive VR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    popover: {
+                        DEFAULT: "var(--popover)",
+                        foreground: "var(--popover-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                    success: "var(--success)",
+                    warning: "var(--warning)",
+                }
+            },
+        }
+    };
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --background: hsl(225 25% 8%);
+            --foreground: hsl(0 0% 95%);
+            --card: hsl(225 25% 12%);
+            --card-foreground: hsl(0 0% 95%);
+            --popover: hsl(225 25% 12%);
+            --popover-foreground: hsl(0 0% 95%);
+            --primary: hsl(215 100% 50%);
+            --primary-foreground: hsl(0 0% 100%);
+            --secondary: hsl(225 25% 18%);
+            --secondary-foreground: hsl(0 0% 90%);
+            --muted: hsl(225 15% 20%);
+            --muted-foreground: hsl(0 0% 65%);
+            --accent: hsl(225 30% 25%);
+            --accent-foreground: hsl(0 0% 95%);
+            --destructive: hsl(0 70% 60%);
+            --destructive-foreground: hsl(0 0% 100%);
+            --border: hsl(225 20% 25%);
+            --input: hsl(225 25% 16%);
+            --ring: hsl(215 100% 50%);
+            --success: hsl(150 80% 50%);
+            --warning: hsl(25 90% 60%);
+            --radius: 0.75rem;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .gradient-border {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            padding: 2px;
+            border-radius: var(--radius);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+        }
+
+        .upload-zone {
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.1), rgba(22, 33, 62, 0.1));
+            border: 2px dashed var(--border);
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.2), rgba(22, 33, 62, 0.2));
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--success);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(22, 33, 62, 0.2));
+        }
+
+        .step-indicator {
+            position: relative;
+        }
+
+        .step-indicator::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: var(--border);
+            transform: translateY(-50%);
+        }
+
+        .step-indicator.active::after {
+            background: var(--primary);
+        }
+
+        .step-indicator:last-child::after {
+            display: none;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            transition: width 0.3s ease;
+        }
+
+        .video-preview {
+            aspect-ratio: 16/9;
+            background: var(--input);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .floating-action {
+            box-shadow: 0 10px 25px rgba(0, 102, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-background text-foreground min-h-screen">
+    <!-- @COMPONENT: Header -->
+    <header class="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-vr-cardboard text-primary-foreground text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">VR180 Converter</h1>
+                        <p class="text-xs text-muted-foreground">2D to Immersive VR</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">How it Works</a>
+                    <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">Examples</a>
+                    <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">Support</a>
+                    <button class="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors">
+                        Sign In
+                    </button>
+                </nav>
+                <button class="md:hidden text-foreground">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <!-- @COMPONENT: Hero Section -->
+    <section class="py-16 bg-gradient-to-br from-background via-secondary/20 to-accent/10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-success bg-clip-text text-transparent">
+                Transform 2D Videos into Immersive VR 180°
+            </h2>
+            <p class="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+                Upload your 2D video clip and watch our AI-powered technology convert it into a stunning VR 180° experience. Perfect for VR headsets and immersive viewing.
+            </p>
+            
+            <!-- Process Steps -->
+            <div class="flex justify-center items-center space-x-8 mb-12">
+                <div class="step-indicator active flex flex-col items-center">
+                    <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-upload text-primary-foreground"></i>
+                    </div>
+                    <span class="text-sm font-medium">Upload</span>
+                </div>
+                <div class="step-indicator flex flex-col items-center">
+                    <div class="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-brain text-muted-foreground"></i>
+                    </div>
+                    <span class="text-sm font-medium text-muted-foreground">AI Process</span>
+                </div>
+                <div class="step-indicator flex flex-col items-center">
+                    <div class="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-eye text-muted-foreground"></i>
+                    </div>
+                    <span class="text-sm font-medium text-muted-foreground">Preview</span>
+                </div>
+                <div class="step-indicator flex flex-col items-center">
+                    <div class="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-download text-muted-foreground"></i>
+                    </div>
+                    <span class="text-sm font-medium text-muted-foreground">Download</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Hero Section -->
+
+    <!-- @COMPONENT: Main Conversion Interface -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Upload Section -->
+        <!-- @COMPONENT: FileUpload -->
+        <div class="bg-card rounded-xl p-8 mb-8 border border-border">
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold mb-2">Upload Your 2D Video</h3>
+                <p class="text-muted-foreground">
+                    Supported formats: MP4, MOV, AVI • Max size: 500MB • Recommended: 1080p or higher
+                </p>
+            </div>
+
+            <div class="upload-zone rounded-xl p-12 text-center cursor-pointer" id="uploadZone" data-implementation="Implement drag-and-drop file upload with validation">
+                <div class="mb-4">
+                    <i class="fas fa-cloud-upload-alt text-6xl text-primary mb-4"></i>
+                    <h4 class="text-xl font-semibold mb-2">Drag & Drop your video here</h4>
+                    <p class="text-muted-foreground mb-4">or click to browse files</p>
+                    <button class="bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors">
+                        <i class="fas fa-folder-open mr-2"></i>
+                        Choose File
+                    </button>
+                </div>
+                <input type="file" class="hidden" id="fileInput" accept=".mp4,.mov,.avi" data-implementation="Handle file selection and validation">
+            </div>
+
+            <!-- File Info Display (Hidden by default) -->
+            <div class="hidden mt-6 p-4 bg-secondary rounded-lg" id="fileInfo">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-video text-primary text-2xl"></i>
+                        <div>
+                            <p class="font-medium" data-bind="selectedFile.name">inception_clip.mp4</p>
+                            <p class="text-sm text-muted-foreground">
+                                <span data-bind="selectedFile.size">125.3 MB</span> • 
+                                <span data-bind="selectedFile.duration">2:34</span> • 
+                                <span data-bind="selectedFile.resolution">1920x1080</span>
+                            </p>
+                        </div>
+                    </div>
+                    <button class="text-destructive hover:text-destructive/80 transition-colors" data-event="click:removeFile">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: FileUpload -->
+
+        <!-- Processing Section -->
+        <!-- @COMPONENT: ProcessingProgress -->
+        <div class="bg-card rounded-xl p-8 mb-8 border border-border hidden" id="processingSection">
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold mb-2">Converting to VR 180°</h3>
+                <p class="text-muted-foreground">Our AI is analyzing depth and creating stereoscopic views...</p>
+            </div>
+
+            <!-- Overall Progress -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium">Overall Progress</span>
+                    <span class="text-sm text-muted-foreground" data-bind="progress.percentage">67%</span>
+                </div>
+                <div class="w-full bg-muted rounded-full h-3">
+                    <div class="progress-bar h-3 rounded-full" style="width: 67%" data-bind="progress.width"></div>
+                </div>
+            </div>
+
+            <!-- Processing Steps -->
+            <div class="grid md:grid-cols-4 gap-4">
+                <!-- @MAP: processingSteps.map(step => ( -->
+                <div class="bg-secondary p-4 rounded-lg">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-check-circle text-success mr-2"></i>
+                        <span class="text-sm font-medium">Depth Analysis</span>
+                    </div>
+                    <div class="w-full bg-muted rounded-full h-2">
+                        <div class="bg-success h-2 rounded-full" style="width: 100%"></div>
+                    </div>
+                    <p class="text-xs text-muted-foreground mt-1">Completed</p>
+                </div>
+
+                <div class="bg-secondary p-4 rounded-lg">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-spinner fa-spin text-primary mr-2"></i>
+                        <span class="text-sm font-medium">Stereoscopic Generation</span>
+                    </div>
+                    <div class="w-full bg-muted rounded-full h-2">
+                        <div class="bg-primary h-2 rounded-full" style="width: 75%"></div>
+                    </div>
+                    <p class="text-xs text-muted-foreground mt-1">Processing...</p>
+                </div>
+
+                <div class="bg-secondary p-4 rounded-lg opacity-50">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-clock text-muted-foreground mr-2"></i>
+                        <span class="text-sm font-medium">Quality Enhancement</span>
+                    </div>
+                    <div class="w-full bg-muted rounded-full h-2">
+                        <div class="bg-muted h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <p class="text-xs text-muted-foreground mt-1">Waiting...</p>
+                </div>
+
+                <div class="bg-secondary p-4 rounded-lg opacity-50">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-clock text-muted-foreground mr-2"></i>
+                        <span class="text-sm font-medium">Final Rendering</span>
+                    </div>
+                    <div class="w-full bg-muted rounded-full h-2">
+                        <div class="bg-muted h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <p class="text-xs text-muted-foreground mt-1">Waiting...</p>
+                </div>
+                <!-- @END_MAP )) -->
+            </div>
+
+            <div class="mt-6 p-4 bg-accent/20 rounded-lg border border-accent/30">
+                <div class="flex items-center">
+                    <i class="fas fa-info-circle text-primary mr-2"></i>
+                    <span class="text-sm">
+                        Estimated time remaining: <span class="font-medium text-foreground" data-bind="progress.timeRemaining">2 minutes 15 seconds</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: ProcessingProgress -->
+
+        <!-- Preview Section -->
+        <!-- @COMPONENT: VideoPreview -->
+        <div class="bg-card rounded-xl p-8 mb-8 border border-border hidden" id="previewSection">
+            <div class="mb-6">
+                <h3 class="text-2xl font-bold mb-2">Preview Your VR 180° Video</h3>
+                <p class="text-muted-foreground">Compare the original with your new VR experience</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-6 mb-6">
+                <!-- Original Video -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-3 flex items-center">
+                        <i class="fas fa-video mr-2 text-muted-foreground"></i>
+                        Original Video
+                    </h4>
+                    <div class="video-preview">
+                        <!-- Mock video preview showing original Inception scene -->
+                        <!-- A futuristic cityscape with impossible architecture bending upward, reminiscent of the Inception movie -->
+                        <img src="https://images.unsplash.com/photo-1518709268805-4e9042af2176?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=450" alt="Original Inception scene with bent cityscape" class="w-full h-full object-cover rounded-lg" />
+                    </div>
+                    <div class="mt-2 flex items-center justify-between text-sm text-muted-foreground">
+                        <span>1920x1080 • 30fps</span>
+                        <button class="text-primary hover:text-primary/80 transition-colors">
+                            <i class="fas fa-play mr-1"></i>Play
+                        </button>
+                    </div>
+                </div>
+
+                <!-- VR 180 Preview -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-3 flex items-center">
+                        <i class="fas fa-vr-cardboard mr-2 text-primary"></i>
+                        VR 180° Experience
+                    </h4>
+                    <div class="video-preview relative">
+                        <!-- Stereoscopic side-by-side view of the cityscape for VR viewing -->
+                        <!-- A split-screen view showing the same futuristic cityscape from slightly different angles for stereoscopic 3D effect -->
+                        <img src="https://images.unsplash.com/photo-1551079261-bce3e3cd4e24?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=450" alt="Stereoscopic VR view of futuristic cityscape" class="w-full h-full object-cover rounded-lg" />
+                        <div class="absolute top-2 right-2 bg-success text-success text-xs px-2 py-1 rounded-full">
+                            <i class="fas fa-check mr-1"></i>VR Ready
+                        </div>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between text-sm text-muted-foreground">
+                        <span>3840x1920 • 30fps • Stereoscopic</span>
+                        <button class="text-primary hover:text-primary/80 transition-colors">
+                            <i class="fas fa-vr-cardboard mr-1"></i>VR Preview
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Controls -->
+            <div class="flex flex-wrap gap-4 justify-center">
+                <button class="bg-secondary text-secondary-foreground px-6 py-3 rounded-lg hover:bg-secondary/80 transition-colors">
+                    <i class="fas fa-redo mr-2"></i>
+                    Regenerate
+                </button>
+                <button class="bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors">
+                    <i class="fas fa-eye mr-2"></i>
+                    Preview in VR
+                </button>
+                <button class="bg-success text-white px-6 py-3 rounded-lg hover:bg-success/90 transition-colors floating-action">
+                    <i class="fas fa-download mr-2"></i>
+                    Download VR Video
+                </button>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: VideoPreview -->
+
+        <!-- Download Section -->
+        <!-- @COMPONENT: DownloadResults -->
+        <div class="bg-card rounded-xl p-8 border border-border hidden" id="downloadSection">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check text-success text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">VR Conversion Complete!</h3>
+                <p class="text-muted-foreground">Your VR 180° video is ready for download</p>
+            </div>
+
+            <div class="max-w-2xl mx-auto space-y-4">
+                <!-- Download Options -->
+                <div class="bg-secondary p-6 rounded-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-vr-cardboard text-primary text-2xl"></i>
+                            <div>
+                                <h4 class="font-semibold">VR 180° Video (High Quality)</h4>
+                                <p class="text-sm text-muted-foreground">3840x1920 • Stereoscopic • 245.7 MB</p>
+                            </div>
+                        </div>
+                        <button class="bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                            <i class="fas fa-download mr-2"></i>Download
+                        </button>
+                    </div>
+                    <div class="text-xs text-muted-foreground">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Compatible with Oculus Quest, HTC Vive, PICO, and other VR headsets
+                    </div>
+                </div>
+
+                <div class="bg-secondary p-6 rounded-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-mobile-alt text-accent text-2xl"></i>
+                            <div>
+                                <h4 class="font-semibold">Mobile VR Version</h4>
+                                <p class="text-sm text-muted-foreground">1920x960 • Optimized • 98.2 MB</p>
+                            </div>
+                        </div>
+                        <button class="bg-secondary text-secondary-foreground border border-border px-6 py-2 rounded-lg hover:bg-accent transition-colors">
+                            <i class="fas fa-download mr-2"></i>Download
+                        </button>
+                    </div>
+                    <div class="text-xs text-muted-foreground">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Perfect for smartphone VR viewers and Google Cardboard
+                    </div>
+                </div>
+
+                <!-- Sharing Options -->
+                <div class="pt-6 border-t border-border">
+                    <h4 class="font-semibold mb-4 text-center">Share Your VR Experience</h4>
+                    <div class="flex justify-center space-x-4">
+                        <button class="bg-[#1877f2] text-white p-3 rounded-lg hover:opacity-90 transition-opacity">
+                            <i class="fab fa-facebook-f"></i>
+                        </button>
+                        <button class="bg-[#1da1f2] text-white p-3 rounded-lg hover:opacity-90 transition-opacity">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                        <button class="bg-[#0077b5] text-white p-3 rounded-lg hover:opacity-90 transition-opacity">
+                            <i class="fab fa-linkedin-in"></i>
+                        </button>
+                        <button class="bg-secondary text-secondary-foreground border border-border p-3 rounded-lg hover:bg-accent transition-colors">
+                            <i class="fas fa-link"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: DownloadResults -->
+
+    </main>
+
+    <!-- @COMPONENT: Footer -->
+    <footer class="bg-card border-t border-border py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                            <i class="fas fa-vr-cardboard text-primary-foreground"></i>
+                        </div>
+                        <span class="font-bold">VR180 Converter</span>
+                    </div>
+                    <p class="text-muted-foreground text-sm">
+                        Transform your 2D videos into immersive VR experiences with our AI-powered technology.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Product</h4>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li><a href="#" class="hover:text-foreground transition-colors">How it Works</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">Pricing</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">API</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">Examples</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Support</h4>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li><a href="#" class="hover:text-foreground transition-colors">Documentation</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">Help Center</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">Status</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2 text-sm text-muted-foreground">
+                        <li><a href="#" class="hover:text-foreground transition-colors">About</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">Privacy</a></li>
+                        <li><a href="#" class="hover:text-foreground transition-colors">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-border pt-8 mt-8 flex flex-col sm:flex-row justify-between items-center">
+                <p class="text-muted-foreground text-sm">
+                    © 2024 VR180 Converter. All rights reserved.
+                </p>
+                <div class="flex space-x-4 mt-4 sm:mt-0">
+                    <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-muted-foreground hover:text-foreground transition-colors">
+                        <i class="fab fa-discord"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: Footer -->
+
+    <script>
+        (function() {
+            // TODO: Implement business logic, API calls, or state management
+            
+            // Mock file upload functionality
+            const uploadZone = document.getElementById('uploadZone');
+            const fileInput = document.getElementById('fileInput');
+            const fileInfo = document.getElementById('fileInfo');
+            const processingSection = document.getElementById('processingSection');
+            const previewSection = document.getElementById('previewSection');
+            const downloadSection = document.getElementById('downloadSection');
+
+            // Drag and drop handlers
+            uploadZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                // TODO: Handle file drop and validation
+                simulateFileUpload();
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    simulateFileUpload();
+                }
+            });
+
+            function simulateFileUpload() {
+                // Show file info
+                fileInfo.classList.remove('hidden');
+                
+                // Simulate processing after 2 seconds
+                setTimeout(() => {
+                    startProcessing();
+                }, 2000);
+            }
+
+            function startProcessing() {
+                processingSection.classList.remove('hidden');
+                
+                // Simulate processing completion after 8 seconds
+                setTimeout(() => {
+                    showPreview();
+                }, 8000);
+            }
+
+            function showPreview() {
+                previewSection.classList.remove('hidden');
+                processingSection.classList.add('hidden');
+            }
+
+            // Mock processing progress animation
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                if (progress < 100 && !processingSection.classList.contains('hidden')) {
+                    progress += Math.random() * 15;
+                    if (progress > 100) progress = 100;
+                    
+                    const progressBar = document.querySelector('.progress-bar');
+                    if (progressBar) {
+                        progressBar.style.width = progress + '%';
+                    }
+                    
+                    if (progress >= 100) {
+                        clearInterval(progressInterval);
+                    }
+                }
+            }, 500);
+
+            // Preview and download buttons
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('button')?.textContent.includes('Download VR Video')) {
+                    downloadSection.classList.remove('hidden');
+                    previewSection.classList.add('hidden');
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
