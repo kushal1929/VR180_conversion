@@ -7,12 +7,18 @@ import { storage } from "./storage";
 import { insertVideoSchema } from "@shared/schema";
 import { VideoProcessor } from "./services/video-processor";
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 const upload = multer({
-  dest: "uploads/",
+  dest: uploadsDir,
   limits: {
     fileSize: 500 * 1024 * 1024, // 500MB
   },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (req: any, file: any, cb: any) => {
     const allowedTypes = ['.mp4', '.mov', '.avi'];
     const ext = path.extname(file.originalname).toLowerCase();
     if (allowedTypes.includes(ext)) {
