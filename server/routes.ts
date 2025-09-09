@@ -33,8 +33,22 @@ const videoProcessor = new VideoProcessor(storage);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Upload video endpoint
-  app.post("/api/videos/upload", upload.single("video"), async (req, res) => {
+  app.post("/api/videos/upload", (req, res, next) => {
+    upload.single("video")(req, res, (err) => {
+      if (err) {
+        console.error("Multer error:", err);
+        return res.status(400).json({ message: err.message });
+      }
+      next();
+    });
+  }, async (req: any, res) => {
     try {
+      console.log("Upload request received:", {
+        file: req.file ? "File present" : "No file",
+        body: req.body,
+        headers: req.headers['content-type']
+      });
+      
       if (!req.file) {
         return res.status(400).json({ message: "No video file provided" });
       }
