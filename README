@@ -1,0 +1,79 @@
+VR180 Conversion
+Overview
+
+VR180 Conversion is a web application designed to convert 3D 360° videos into immersive VR180 format. This tool is particularly useful for content creators and developers working with VR180 videos, enabling them to convert and view their content in a VR headset for a more immersive experience.
+
+Live Demo
+
+Explore the live application here: https://vr180-conversion.onrender.com/
+
+Features
+
+3D 360° to VR180 Conversion: Transform 360° videos into VR180 format for immersive viewing.
+
+Real-Time Preview: View the converted content directly in your browser before finalizing.
+
+User-Friendly Interface: Simple and intuitive design for ease of use.
+
+Technologies Used
+
+Frontend: React, Tailwind CSS
+
+Backend: Express.js
+
+Video Processing: FFmpeg
+
+Database: PostgreSQL
+
+Authentication: Passport.js
+
+State Management: React Query
+
+Setup Instructions
+
+To run this project locally, follow these steps:
+
+Clone the repository:
+
+git clone https://github.com/kushal1929/VR180_conversion.git
+cd VR180_conversion
+
+
+Install dependencies:
+
+npm install
+
+
+Set up environment variables:
+
+Create a .env file in the root directory and add the following:
+
+DATABASE_URL=your_database_url
+SESSION_SECRET=your_session_secret
+
+
+Run the development server:
+
+npm run dev
+
+
+The application will be available at http://localhost:3000
+.
+
+Deployment
+
+This application is deployed on Render. For deployment on other platforms, ensure the following:
+
+Node.js: Version 18.x
+
+Build Command: npm run build
+
+Start Command: npm run start
+
+Contributing
+
+Contributions are welcome! Please fork the repository, create a new branch, and submit a pull request with your changes.
+
+License
+
+This project is licensed under the MIT License.
